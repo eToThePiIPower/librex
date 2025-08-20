@@ -86,7 +86,6 @@ defmodule LibrexWeb do
       import Phoenix.HTML
       # Core UI components
       import LibrexWeb.CoreComponents
-      import LibrexWeb.NavbarComponents
 
       # Common modules used in templates
       alias Phoenix.LiveView.JS
