@@ -45,7 +45,8 @@ config :spark,
 
 config :librex,
   ecto_repos: [Librex.Repo],
-  generators: [timestamp_type: :utc_datetime, binary_id: true]
+  generators: [timestamp_type: :utc_datetime, binary_id: true],
+  ash_domains: [Librex.Library]
 
 # Configures the endpoint
 config :librex, LibrexWeb.Endpoint,
