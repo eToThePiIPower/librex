@@ -14,9 +14,13 @@ defmodule LibrexWeb.Authors.IndexLive do
 
   @impl true
   def handle_params(_params, _url, socket) do
+    authors = Library.read_authors!()
+    empty = Enum.empty?(authors)
+
     socket =
       socket
-      |> stream(:authors, Library.read_authors!())
+      |> stream(:authors, authors)
+      |> assign(:authors_empty, empty)
 
     {:noreply, socket}
   end
@@ -34,7 +38,7 @@ defmodule LibrexWeb.Authors.IndexLive do
         </:actions>
       </.header>
 
-      <div :if={@streams.authors == []} class="p-8 text-center">
+      <div :if={@authors_empty} class="p-8 text-center">
         <.icon name="hero-face-frown" class="w-32 h-32 bg-gray-300" />
         <p>No author data to display!</p>
       </div>

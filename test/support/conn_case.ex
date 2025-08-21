@@ -28,6 +28,8 @@ defmodule LibrexWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import LibrexWeb.ConnCase
+      import Librex.Generator
+      import PhoenixTest
     end
   end
 
