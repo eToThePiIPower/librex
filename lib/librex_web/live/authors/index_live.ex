@@ -51,11 +51,13 @@ defmodule LibrexWeb.Authors.IndexLive do
   def author_card(assigns) do
     ~H"""
     <div id={@id} data-role="author-card" class="card bg-base-100 shadow-xl">
-      <figure><img src="https://placehold.co/400x400" alt="Shoes" /></figure>
-      <div class="card-body h-48">
-        <h2 class="card-title">{@author.name}</h2>
-        <p>{@author.biography}</p>
-      </div>
+      <.link navigate={~p"/authors/#{@author.id}"}>
+        <figure><img src="https://placehold.co/400x400" alt="Shoes" /></figure>
+        <div class="card-body h-48">
+          <h2 class="card-title">{@author.name}</h2>
+          <p>{@author.biography}</p>
+        </div>
+      </.link>
     </div>
     """
   end

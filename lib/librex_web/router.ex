@@ -18,6 +18,8 @@ defmodule LibrexWeb.Router do
     pipe_through :browser
 
     live "/", Authors.IndexLive, :index
+
+    live "/authors/:id", Authors.ShowLive, :show
   end
 
   # Other scopes may use custom stacks.

@@ -42,7 +42,7 @@ defmodule LibrexWeb.Layouts do
         </button>
       </div>
       <div class="flex-1">
-        <a class="btn btn-ghost text-xl">Librex</a>
+        <.link navigate={~p"/"} class="btn btn-ghost text-xl">Librex</.link>
       </div>
       <div class="flex-none">
         <div class="scale-sm">
