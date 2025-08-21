@@ -17,7 +17,7 @@ defmodule LibrexWeb.Router do
   scope "/", LibrexWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", Authors.IndexLive, :index
   end
 
   # Other scopes may use custom stacks.
