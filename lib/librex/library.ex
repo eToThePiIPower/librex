@@ -1,6 +1,5 @@
 defmodule Librex.Library do
-  use Ash.Domain,
-    otp_app: :librex
+  use Ash.Domain, otp_app: :librex, extensions: [AshPhoenix]
 
   resources do
     resource Librex.Library.Author do

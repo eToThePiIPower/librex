@@ -80,6 +80,42 @@ defmodule LibrexWeb.CoreComponents do
   end
 
   @doc """
+  Renders a simple form.
+
+  ## Examples
+
+      <.simple_form for={@form} phx-change="validate" phx-submit="save">
+        <.input field={@form[:email]} label="Email"/>
+        <.input field={@form[:username]} label="Username" />
+        <:actions>
+          <.button>Save</.button>
+        </:actions>
+      </.simple_form>
+  """
+  attr :for, :any, required: true, doc: "the data structure for the form"
+  attr :as, :any, default: nil, doc: "the server side parameter to collect all input under"
+
+  attr :rest, :global,
+    include: ~w(autocomplete name rel action enctype method novalidate target multipart),
+    doc: "the arbitrary HTML attributes to apply to the form tag"
+
+  slot :inner_block, required: true
+  slot :actions, doc: "the slot for form actions, such as a submit button"
+
+  def simple_form(assigns) do
+    ~H"""
+    <.form :let={f} for={@for} as={@as} {@rest}>
+      <div class="space-y-8">
+        {render_slot(@inner_block, f)}
+        <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-6">
+          {render_slot(action, f)}
+        </div>
+      </div>
+    </.form>
+    """
+  end
+
+  @doc """
   Renders a button with navigation support.
 
   ## Examples
@@ -249,7 +285,7 @@ defmodule LibrexWeb.CoreComponents do
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="fieldset mb-2" data-fieldset-for={@name}>
       <label>
         <span :if={@label} class="label mb-1">{@label}</span>
         <input
@@ -266,6 +302,41 @@ defmodule LibrexWeb.CoreComponents do
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
+    """
+  end
+
+  def form_input_styles do
+    [
+      "my-2 block w-full rounded-lg text-zinc-900 focus:ring focus:outline-none sm:leading-6",
+      "border-zinc-300 focus:border-zinc-400 focus:ring-zinc-100",
+      "error:border-error-400 error:focus:border-error-600 error:focus:ring-error-100",
+      "disabled:bg-gray-100 disabled:text-zinc-400"
+    ]
+  end
+
+  attr :errors, :list, default: []
+  attr :class, :string, default: ""
+  slot :inner_block
+
+  def form_control(assigns) do
+    ~H"""
+    <div class={[@class, @errors != [] && "error"]}>
+      {render_slot(@inner_block)}
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a label.
+  """
+  attr :for, :string, default: nil
+  slot :inner_block, required: true
+
+  def label(assigns) do
+    ~H"""
+    <label for={@for} class="text-sm font-medium leading-6 text-zinc-800 error:text-error-600">
+      {render_slot(@inner_block)}
+    </label>
     """
   end
 

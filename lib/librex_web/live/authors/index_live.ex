@@ -32,7 +32,7 @@ defmodule LibrexWeb.Authors.IndexLive do
       <.header>
         <h1>Authors</h1>
         <:actions>
-          <.button variant="primary" navigate={~p"/"}>
+          <.button variant="primary" navigate={~p"/authors/new"}>
             <.icon name="hero-plus" /> New Author
           </.button>
         </:actions>
@@ -43,8 +43,12 @@ defmodule LibrexWeb.Authors.IndexLive do
         <p>No author data to display!</p>
       </div>
 
-      <ul class="gap-6 lg:gap-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-        <li :for={{id, author} <- @streams.authors}>
+      <ul
+        id="authors-stream"
+        phx-update="stream"
+        class="gap-6 lg:gap-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
+      >
+        <li :for={{id, author} <- @streams.authors} id={id}>
           <.author_card id={id} author={author} />
         </li>
       </ul>
@@ -54,7 +58,7 @@ defmodule LibrexWeb.Authors.IndexLive do
 
   def author_card(assigns) do
     ~H"""
-    <div id={@id} data-role="author-card" class="card bg-base-100 shadow-xl">
+    <div data-role="author-card" class="card bg-base-100 shadow-xl">
       <.link navigate={~p"/authors/#{@author.id}"}>
         <figure><img src="https://placehold.co/400x400" alt="Shoes" /></figure>
         <div class="card-body h-48">
