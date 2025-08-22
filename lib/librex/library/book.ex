@@ -10,6 +10,18 @@ defmodule Librex.Library.Book do
     end
   end
 
+  actions do
+    defaults [:read, :destroy]
+
+    create :create do
+      accept [:title, :year_released, :cover_image_url, :author_id]
+    end
+
+    update :update do
+      accept [:title, :year_released, :cover_image_url]
+    end
+  end
+
   attributes do
     uuid_primary_key :id
 
@@ -20,7 +32,7 @@ defmodule Librex.Library.Book do
 
     attribute :year_released, :integer do
       allow_nil? false
-      constraints min: 0, max: 2100
+      constraints min: -2100, max: 2100
     end
 
     attribute :cover_image_url, :string

@@ -10,6 +10,17 @@ defmodule Librex.Library do
       define :destroy_author, action: :destroy
     end
 
+    resource Librex.Library.Book do
+      define :create_book, action: :create
+      define :get_book_by_id, action: :read, get_by: :id
+      define :update_book, action: :update
+      define :destroy_book, action: :destroy
+    end
+
+    forms do
+      form :create_book, args: [:author_id]
+    end
+
     resource Librex.Library.Book
   end
 end

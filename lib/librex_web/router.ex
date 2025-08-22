@@ -22,6 +22,9 @@ defmodule LibrexWeb.Router do
     live "/authors/new", Authors.FormLive, :new
     live "/authors/:id/edit", Authors.FormLive, :new
     live "/authors/:id", Authors.ShowLive, :show
+
+    live "/authors/:author_id/books/new", Books.FormLive, :new
+    live "/books/:id/edit", Books.FormLive, :edit
   end
 
   # Other scopes may use custom stacks.

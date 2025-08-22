@@ -45,6 +45,9 @@ defmodule LibrexWeb.Authors.ShowLive do
           {@author.name}
         </h1>
         <:actions>
+          <.button navigate={~p"/authors/#{@author}/books/new"}>
+            <.icon name="hero-plus" /> Add a Book
+          </.button>
           <.button variant="primary" navigate={~p"/authors/#{@author}/edit"}>
             <.icon name="hero-plus" /> Edit Author
           </.button>
