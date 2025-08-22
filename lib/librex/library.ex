@@ -8,6 +8,8 @@ defmodule Librex.Library do
       define :get_author_by_id, action: :read, get_by: :id
       define :update_author, action: :update
       define :destroy_author, action: :destroy
+
+      define :search_authors, action: :search
     end
 
     resource Librex.Library.Book do
