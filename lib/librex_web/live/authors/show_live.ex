@@ -37,6 +37,28 @@ defmodule LibrexWeb.Authors.ShowLive do
     {:noreply, socket}
   end
 
+  def handle_event("destroy-book", %{"book_id" => book_id}, socket) do
+    socket =
+      case Library.destroy_book(book_id) do
+        :ok ->
+          socket
+          |> update(:author, fn author ->
+            Map.update!(author, :books, fn books ->
+              Enum.reject(books, &(&1.id == book_id))
+            end)
+          end)
+          |> put_flash(:info, "Book deleted successfully")
+
+        {:error, error} ->
+          Logger.info("Could not delete book '#{socket.assigns.author.id}: #{inspect(error)}")
+
+          socket
+          |> put_flash(:error, "Could not delete book")
+      end
+
+    {:noreply, socket}
+  end
+
   def render(assigns) do
     ~H"""
     <Layouts.app {assigns}>
@@ -74,7 +96,7 @@ defmodule LibrexWeb.Authors.ShowLive do
 
   def book_card(assigns) do
     ~H"""
-    <div class="card card-compact w-48 bg-base-100 shadow-xl">
+    <div id={"book-#{@book.id}"} class="card card-compact w-48 bg-base-100 shadow-xl">
       <figure><img src="https://placehold.co/400x400" alt="Shoes" /></figure>
       <div class="card-body">
         <h2 class="card-title">{@book.title}</h2>
@@ -82,6 +104,15 @@ defmodule LibrexWeb.Authors.ShowLive do
       </div>
       <div class="card-actions">
         <.button navigate={~p"/books/#{@book}/edit"} class="btn btn-sm btn-block">Edit</.button>
+        <.button
+          class="btn btn-sm btn-error btn-soft btn-block"
+          variant="danger"
+          phx-click="destroy-book"
+          phx-value-book_id={@book.id}
+          data-confirm={"Are you sure you want to delete #{@book.title}?"}
+        >
+          Delete Book
+        </.button>
       </div>
     </div>
     """

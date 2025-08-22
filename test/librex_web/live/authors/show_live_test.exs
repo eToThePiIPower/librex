@@ -24,5 +24,20 @@ defmodule LibrexWeb.Authors.ShowLiveTest do
 
       assert {:error, _} = Library.get_author_by_id(author.id)
     end
+
+    test "'destroy-book' can delete books", %{conn: conn} do
+      author = generate(author())
+      book = generate(book(author_id: author.id))
+
+      conn
+      |> visit(~p"/authors/#{author}")
+      |> within("#book-#{book.id}", fn conn ->
+        conn
+        |> click_button("Delete Book")
+      end)
+      |> assert_has(flash(:info), text: "Book deleted successfully")
+
+      assert {:error, _} = Library.get_book_by_id(book.id)
+    end
   end
 end
