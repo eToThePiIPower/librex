@@ -9,5 +9,7 @@ defmodule Librex.Library do
       define :update_author, action: :update
       define :destroy_author, action: :destroy
     end
+
+    resource Librex.Library.Book
   end
 end

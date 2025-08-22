@@ -23,4 +23,8 @@ defmodule Librex.Library.Author do
     create_timestamp :inserted_at
     update_timestamp :updated_at
   end
+
+  relationships do
+    has_many :books, Librex.Library.Book
+  end
 end
