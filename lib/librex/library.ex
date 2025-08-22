@@ -9,7 +9,7 @@ defmodule Librex.Library do
       define :update_author, action: :update
       define :destroy_author, action: :destroy
 
-      define :search_authors, action: :search
+      define :search_authors, action: :search, args: [:query]
     end
 
     resource Librex.Library.Book do

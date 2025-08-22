@@ -13,16 +13,22 @@ defmodule LibrexWeb.Authors.IndexLive do
   end
 
   @impl true
-  def handle_params(_params, _url, socket) do
-    authors = Library.read_authors!()
-    empty = Enum.empty?(authors)
+  def handle_params(params, _url, socket) do
+    query_text = Map.get(params, "q", "")
+    authors = Library.search_authors!(query_text)
 
     socket =
       socket
-      |> stream(:authors, authors)
-      |> assign(:authors_empty, empty)
+      |> assign(:authors, authors)
+      |> assign(:query_text, query_text)
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("search", %{"query" => query_text}, socket) do
+    params = remove_empty(%{q: query_text})
+    {:noreply, push_patch(socket, to: ~p"/?#{params}")}
   end
 
   @impl true
@@ -32,24 +38,26 @@ defmodule LibrexWeb.Authors.IndexLive do
       <.header>
         <h1>Authors</h1>
         <:actions>
+          <.search_box query={@query_text} data-role="artist-search" phx-submit="search" />
+        </:actions>
+        <:actions>
           <.button variant="primary" navigate={~p"/authors/new"}>
             <.icon name="hero-plus" /> New Author
           </.button>
         </:actions>
       </.header>
 
-      <div :if={@authors_empty} class="p-8 text-center">
+      <div :if={@authors == []} class="p-8 text-center">
         <.icon name="hero-face-frown" class="w-32 h-32 bg-gray-300" />
         <p>No author data to display!</p>
       </div>
 
       <ul
-        id="authors-stream"
-        phx-update="stream"
+        id="authors-list"
         class="gap-6 lg:gap-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
       >
-        <li :for={{id, author} <- @streams.authors} id={id}>
-          <.author_card id={id} author={author} />
+        <li :for={author <- @authors} id={author.id}>
+          <.author_card author={author} />
         </li>
       </ul>
     </Layouts.app>
@@ -68,5 +76,29 @@ defmodule LibrexWeb.Authors.IndexLive do
       </.link>
     </div>
     """
+  end
+
+  attr :query, :string, default: ""
+  attr :rest, :global
+
+  @spec search_box(map()) :: Phoenix.LiveView.Rendered.t()
+  def search_box(assigns) do
+    ~H"""
+    <form class="relative w-fit inline-block" {@rest}>
+      <.input
+        label="Search"
+        icon="hero-magnifying-glass"
+        name="query"
+        id="search-text"
+        value={@query}
+        kbds={["alt", "s"]}
+        accesskey="s"
+      />
+    </form>
+    """
+  end
+
+  defp remove_empty(params) do
+    Enum.filter(params, fn {_key, value} -> value != "" end)
   end
 end

@@ -185,6 +185,7 @@ defmodule LibrexWeb.CoreComponents do
   attr :id, :any, default: nil
   attr :name, :any
   attr :label, :string, default: nil
+  attr :icon, :string, default: nil
   attr :value, :any
 
   attr :type, :string,
@@ -202,6 +203,7 @@ defmodule LibrexWeb.CoreComponents do
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
   attr :class, :string, default: nil, doc: "the input class to use over defaults"
   attr :error_class, :string, default: nil, doc: "the input error class to use over defaults"
+  attr :kbds, :list, default: []
 
   attr :rest, :global,
     include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
@@ -283,6 +285,29 @@ defmodule LibrexWeb.CoreComponents do
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
+    """
+  end
+
+  def input(%{icon: icon} = assigns) when icon != nil do
+    ~H"""
+    <label class="input">
+      <span :if={@label} class="sr-only">{@label}</span>
+      <.icon name={@icon} class="size-[1rem]" />
+      <input
+        type={@type}
+        name={@name}
+        id={@id}
+        value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+        placeholder={@label}
+        class={[
+          @class || "grow",
+          @errors != [] && (@error_class || "input-error")
+        ]}
+        {@rest}
+      />
+      <kbd :for={kbd <- @kbds} class="hidden sm:kbd sm:kbd-xs">{kbd}</kbd>
+    </label>
+    <.error :for={msg <- @errors}>{msg}</.error>
     """
   end
 
