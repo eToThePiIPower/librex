@@ -36,11 +36,9 @@ defmodule LibrexWeb.Authors.IndexLive do
     ~H"""
     <Layouts.app flash={@flash}>
       <.header>
-        <h1>Authors</h1>
+        <.h1>Authors</.h1>
         <:actions>
           <.search_box query={@query_text} data-role="artist-search" phx-submit="search" />
-        </:actions>
-        <:actions>
           <.button variant="primary" navigate={~p"/authors/new"}>
             <.icon name="hero-plus" /> New Author
           </.button>
@@ -86,12 +84,12 @@ defmodule LibrexWeb.Authors.IndexLive do
     ~H"""
     <form class="relative w-fit inline-block" {@rest}>
       <.input
+        fieldset?={false}
         label="Search"
         icon="hero-magnifying-glass"
         name="query"
         id="search-text"
         value={@query}
-        kbds={["alt", "s"]}
         accesskey="s"
       />
     </form>

@@ -63,17 +63,25 @@ defmodule LibrexWeb.Authors.ShowLive do
     ~H"""
     <Layouts.app {assigns}>
       <.header>
-        <h1>
+        <.h1>
           {@author.name}
-        </h1>
+        </.h1>
         <:actions>
-          <.button navigate={~p"/authors/#{@author}/books/new"}>
+          <.button
+            class="btn btn-xs sm:btn-md btn-primary"
+            navigate={~p"/authors/#{@author}/books/new"}
+          >
             <.icon name="hero-plus" /> Add a Book
           </.button>
-          <.button variant="primary" navigate={~p"/authors/#{@author}/edit"}>
+          <.button
+            class="btn btn-xs sm:btn-md btn-soft"
+            variant="primary"
+            navigate={~p"/authors/#{@author}/edit"}
+          >
             <.icon name="hero-plus" /> Edit Author
           </.button>
           <.button
+            class="btn btn-xs sm:btn-md btn-error btn-soft"
             variant="danger"
             phx-click="destroy-author"
             data-confirm={"Are you sure you want to delete #{@author.name}?"}
