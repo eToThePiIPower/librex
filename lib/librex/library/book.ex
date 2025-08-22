@@ -6,7 +6,7 @@ defmodule Librex.Library.Book do
     repo Librex.Repo
 
     references do
-      reference :author, index?: true
+      reference :author, index?: true, on_delete: :delete
     end
   end
 
