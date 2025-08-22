@@ -17,14 +17,13 @@ defmodule LibrexWeb.Books.FormLive do
   end
 
   def mount(%{"id" => book_id}, _session, socket) do
-    book = Library.get_book_by_id!(book_id)
-    author = Library.get_author_by_id!(book.author_id)
+    book = Library.get_book_by_id!(book_id, load: [:author])
     form = Library.form_to_update_book(book)
 
     socket =
       socket
       |> assign(:form, to_form(form))
-      |> assign(:author, author)
+      |> assign(:author, book.author)
       |> assign(:page_title, "New Book")
 
     {:ok, socket}

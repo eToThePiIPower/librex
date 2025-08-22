@@ -25,6 +25,8 @@ defmodule Librex.Library.Author do
   end
 
   relationships do
-    has_many :books, Librex.Library.Book
+    has_many :books, Librex.Library.Book do
+      sort year_released: :desc
+    end
   end
 end

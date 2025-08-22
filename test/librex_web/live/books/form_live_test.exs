@@ -11,6 +11,7 @@ defmodule LibrexWeb.Books.FormLiveTest do
       |> visit(~p"/authors/#{author}/books/new")
       |> fill_in("Title", with: "Iliad")
       |> fill_in("Year Released", with: "-800")
+      |> fill_in("Cover image URL", with: "/images/cover/iliad.jpg")
       |> click_button("Save")
       |> assert_has(flash(:info), text: "Book saved successfully")
     end
@@ -22,8 +23,13 @@ defmodule LibrexWeb.Books.FormLiveTest do
       |> visit(~p"/authors/#{author}/books/new")
       |> fill_in("Title", with: "")
       |> fill_in("Year Released", with: "-2101")
+      |> fill_in("Cover image URL", with: "invalid")
       |> assert_has(field_error("title"), text: "is required")
-      |> assert_has(field_error("year_released"), text: "must be more than or equal to -2100")
+      |> assert_has(field_error("year_released"), text: "must be between 2100 BCE and next year")
+      |> assert_has(field_error("cover_image_url"), text: "must end in .png or .jpg")
+      |> assert_has(field_error("cover_image_url"),
+        text: "must start with http[s]:// or /images/cover/"
+      )
     end
 
     test "fails when invalid details are entered", %{conn: conn} do
@@ -62,7 +68,12 @@ defmodule LibrexWeb.Books.FormLiveTest do
       conn
       |> visit(~p"/books/#{book}/edit")
       |> fill_in("Year Released", with: "2200")
-      |> assert_has(field_error("year_released"), text: "must be less than or equal to 2100")
+      |> fill_in("Cover image URL", with: "http://no_extension")
+      |> assert_has(field_error("year_released"), text: "must be between 2100 BCE and next year")
+      |> assert_has(field_error("cover_image_url"), text: "must end in .png or .jpg")
+      |> refute_has(field_error("cover_image_url"),
+        text: "must start with http[s]:// or /images/cover/"
+      )
     end
   end
 

@@ -35,3 +35,6 @@ librex-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Ignore Librex.Library.Book :cover_image_url images
+/priv/static/images/cover/
+

@@ -22,6 +22,31 @@ defmodule Librex.Library.Book do
     end
   end
 
+  validations do
+    validate numericality(:year_released,
+               greater_than_or_equal_to: -2100,
+               less_than_or_equal_to: &__MODULE__.next_year/0
+             ),
+             where: [present(:year_released)],
+             message: "must be between 2100 BCE and next year"
+
+    validate match(
+               :cover_image_url,
+               #  ~r"^nope$"
+               ~r"^(https?://|/images/cover/)"
+             ),
+             where: [changing(:cover_image_url)],
+             message: "must start with http[s]:// or /images/cover/"
+
+    validate match(
+               :cover_image_url,
+               #  ~r"^nope$"
+               ~r"(\.png|\.jpg)$"
+             ),
+             where: [changing(:cover_image_url)],
+             message: "must end in .png or .jpg"
+  end
+
   attributes do
     uuid_primary_key :id
 
@@ -32,7 +57,6 @@ defmodule Librex.Library.Book do
 
     attribute :year_released, :integer do
       allow_nil? false
-      constraints min: -2100, max: 2100
     end
 
     attribute :cover_image_url, :string
@@ -46,4 +70,6 @@ defmodule Librex.Library.Book do
       allow_nil? false
     end
   end
+
+  def next_year, do: Date.utc_today().year + 1
 end
