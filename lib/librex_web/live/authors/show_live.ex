@@ -9,7 +9,7 @@ defmodule LibrexWeb.Authors.ShowLive do
   end
 
   def handle_params(%{"id" => author_id}, _url, socket) do
-    {:ok, author} = Library.get_author_by_id(author_id)
+    author = Library.get_author_by_id!(author_id, load: [:books])
 
     socket =
       socket
@@ -64,26 +64,8 @@ defmodule LibrexWeb.Authors.ShowLive do
       <div class="mb-6">{@author.biography}</div>
 
       <div class="carousel carousel-center w-full p-4 space-x-4 rounded-box">
-        <div class="carousel-item">
-          <.book_card book={%{title: "Tolkienesque"}} />
-        </div>
-        <div class="carousel-item">
-          <.book_card book={%{title: "Getting Better"}} />
-        </div>
-        <div class="carousel-item">
-          <.book_card book={%{title: "Jackpot"}} />
-        </div>
-        <div class="carousel-item">
-          <.book_card book={%{title: "Phoned it In"}} />
-        </div>
-        <div class="carousel-item">
-          <.book_card book={%{title: "10 Years Late"}} />
-        </div>
-        <div class="carousel-item">
-          <.book_card book={%{title: "A Slow Regard for the Fans"}} />
-        </div>
-        <div class="carousel-item">
-          <.book_card book={%{title: "Just Let Brandon Finish It"}} />
+        <div :for={book <- @author.books} class="carousel-item">
+          <.book_card book={book} />
         </div>
       </div>
     </Layouts.app>
@@ -96,6 +78,10 @@ defmodule LibrexWeb.Authors.ShowLive do
       <figure><img src="https://placehold.co/400x400" alt="Shoes" /></figure>
       <div class="card-body">
         <h2 class="card-title">{@book.title}</h2>
+        <p>{@book.year_released}</p>
+      </div>
+      <div class="card-actions">
+        <.button navigate={~p"/books/#{@book}/edit"} class="btn btn-sm btn-block">Edit</.button>
       </div>
     </div>
     """

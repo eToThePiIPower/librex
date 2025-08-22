@@ -9,4 +9,19 @@ defmodule Librex.Generator do
       overrides: opts
     )
   end
+
+  def book(opts \\ []) do
+    author_id =
+      opts[:author_id] ||
+        once(:default_author_id, fn -> generate(author().id) end)
+
+    seed_generator(
+      %Librex.Library.Book{
+        title: sequence(:book_title, &"Book #{&1}"),
+        year_released: StreamData.integer(-2100..2100),
+        author_id: author_id
+      },
+      overrides: opts
+    )
+  end
 end
