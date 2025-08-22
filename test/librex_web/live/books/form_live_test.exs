@@ -42,6 +42,19 @@ defmodule LibrexWeb.Books.FormLiveTest do
       |> click_button("Save")
       |> assert_has(flash(:error), text: "Could not save book data")
     end
+
+    test "fails when book already exists", %{conn: conn} do
+      author = generate(author(name: "Homer"))
+      _book = generate(book(author_id: author.id, title: "Iliad", year_released: -800))
+
+      conn
+      |> visit(~p"/authors/#{author}/books/new")
+      |> fill_in("Title", with: "Iliad")
+      |> fill_in("Year Released", with: "-790")
+      |> click_button("Save")
+      |> assert_has(flash(:error), text: "Could not save book data")
+      |> assert_has(field_error("title"), text: "already exists")
+    end
   end
 
   describe "updating an existing book" do

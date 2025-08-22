@@ -71,5 +71,10 @@ defmodule Librex.Library.Book do
     end
   end
 
+  identities do
+    identity :unique_book_title_per_author, [:title, :author_id],
+      message: "already exists for this author"
+  end
+
   def next_year, do: Date.utc_today().year + 1
 end
