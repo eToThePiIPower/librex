@@ -1,7 +1,21 @@
 defmodule LibrexWeb.Authors.FormLive do
   use LibrexWeb, :live_view
 
+  alias Librex.Library
+
   @impl true
+  def mount(%{"id" => author_id}, _session, socket) do
+    {:ok, author} = Library.get_author_by_id(author_id)
+    form = Librex.Library.form_to_update_author(author)
+
+    socket =
+      socket
+      |> assign(:form, to_form(form))
+      |> assign(:page_title, "Updating Author")
+
+    {:ok, socket}
+  end
+
   def mount(_params, _session, socket) do
     form = Librex.Library.form_to_create_author()
 

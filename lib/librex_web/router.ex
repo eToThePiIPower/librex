@@ -20,6 +20,7 @@ defmodule LibrexWeb.Router do
     live "/", Authors.IndexLive, :index
 
     live "/authors/new", Authors.FormLive, :new
+    live "/authors/:id/edit", Authors.FormLive, :new
     live "/authors/:id", Authors.ShowLive, :show
   end
 
