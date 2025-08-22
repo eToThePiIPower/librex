@@ -73,6 +73,7 @@ defmodule Librex.MixProject do
       {:bandit, "~> 1.5"},
       {:live_debugger, "~> 0.3.0", only: :dev},
       {:phoenix_test, "~> 0.7.1", only: :test, runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:igniter, "~> 0.3", only: [:dev]}
     ]
   end
