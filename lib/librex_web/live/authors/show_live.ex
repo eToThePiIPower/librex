@@ -1,5 +1,6 @@
 defmodule LibrexWeb.Authors.ShowLive do
   use LibrexWeb, :live_view
+  require Logger
 
   alias Librex.Library
 
@@ -18,6 +19,24 @@ defmodule LibrexWeb.Authors.ShowLive do
     {:noreply, socket}
   end
 
+  def handle_event("destroy-author", _params, socket) do
+    socket =
+      case Library.destroy_author(socket.assigns.author) do
+        :ok ->
+          socket
+          |> put_flash(:info, "Author deleted successfully")
+          |> push_navigate(to: ~p"/")
+
+        {:error, error} ->
+          Logger.info("Could not delete author '#{socket.assigns.author.id}: #{inspect(error)}")
+
+          socket
+          |> put_flash(:error, "Could not delete author")
+      end
+
+    {:noreply, socket}
+  end
+
   def render(assigns) do
     ~H"""
     <Layouts.app {assigns}>
@@ -28,6 +47,13 @@ defmodule LibrexWeb.Authors.ShowLive do
         <:actions>
           <.button variant="primary" navigate={~p"/authors/#{@author}/edit"}>
             <.icon name="hero-plus" /> Edit Author
+          </.button>
+          <.button
+            variant="danger"
+            phx-click="destroy-author"
+            data-confirm={"Are you sure you want to delete #{@author.name}?"}
+          >
+            Delete Author
           </.button>
         </:actions>
       </.header>
