@@ -49,7 +49,10 @@ defmodule Librex.Library.Author do
   end
 
   aggregates do
-    count :book_count, :books
+    count :book_count, :books do
+      public? true
+    end
+
     first :latest_book_year, :books, :year_released
     first :cover_image_url, :books, :cover_image_url
   end

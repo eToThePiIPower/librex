@@ -191,7 +191,8 @@ defmodule LibrexWeb.Authors.IndexLive do
     do: [
       {"name", "name"},
       {"recently updated", "-updated_at"},
-      {"recently added", "-inserted_at"}
+      {"recently added", "-inserted_at"},
+      {"number of books", "-book_count"}
     ]
 
   defp remove_empty(params) do

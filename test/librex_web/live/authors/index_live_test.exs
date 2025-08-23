@@ -33,14 +33,13 @@ defmodule LibrexWeb.Authors.IndexLiveTest do
   end
 
   describe "sort events" do
-    test "filters the list of authors", %{conn: conn} do
+    test "sorts by name and recently added authors", %{conn: conn} do
       generate(author(name: "Alpha"))
       generate(author(name: "Gamma"))
       generate(author(name: "Beta"))
 
       conn
       |> visit(~p"/")
-      |> assert
       |> select("sort by:", option: "name")
       |> assert_has("#authors-list>li:nth-child(1)", text: "Alpha")
       |> assert_has("#authors-list>li:nth-child(2)", text: "Beta")
@@ -49,6 +48,22 @@ defmodule LibrexWeb.Authors.IndexLiveTest do
       |> assert_has("#authors-list>li:nth-child(1)", text: "Beta")
       |> assert_has("#authors-list>li:nth-child(2)", text: "Gamma")
       |> assert_has("#authors-list>li:nth-child(3)", text: "Alpha")
+    end
+
+    test "sorts by count of books", %{conn: conn} do
+      a1 = generate(author(name: "Shakespear"))
+      a2 = generate(author(name: "Homer"))
+      a3 = generate(author(name: "Mary Shelley"))
+      generate_many(book(author_id: a1.id), 10)
+      generate_many(book(author_id: a2.id), 2)
+      generate_many(book(author_id: a3.id), 1)
+
+      conn
+      |> visit(~p"/")
+      |> select("sort by:", option: "number of books")
+      |> assert_has("#authors-list>li:nth-child(1)", text: "Shakespear")
+      |> assert_has("#authors-list>li:nth-child(2)", text: "Homer")
+      |> assert_has("#authors-list>li:nth-child(3)", text: "Mary Shelley")
     end
   end
 
