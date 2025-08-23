@@ -21,6 +21,8 @@ defmodule Librex.Library.Author do
       end
 
       filter expr(contains(name, ^arg(:query)))
+
+      pagination offset?: true, default_limit: 12
     end
   end
 

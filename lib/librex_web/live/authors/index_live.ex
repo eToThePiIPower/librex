@@ -15,12 +15,13 @@ defmodule LibrexWeb.Authors.IndexLive do
   @impl true
   def handle_params(params, _url, socket) do
     query_text = Map.get(params, "q", "")
+    page_params = AshPhoenix.LiveView.page_from_params(params, 12)
     sort_by = Map.get(params, "sort_by") |> validate_sortby()
-    authors = Library.search_authors!(query_text, query: [sort_input: sort_by])
+    page = Library.search_authors!(query_text, page: page_params, query: [sort_input: sort_by])
 
     socket =
       socket
-      |> assign(:authors, authors)
+      |> assign(:page, page)
       |> assign(:sort_by, sort_by)
       |> assign(:query_text, query_text)
 
@@ -53,7 +54,7 @@ defmodule LibrexWeb.Authors.IndexLive do
         </:actions>
       </.header>
 
-      <div :if={@authors == []} class="p-8 text-center">
+      <div :if={@page.results == []} class="p-8 text-center">
         <.icon name="hero-face-frown" class="w-32 h-32 bg-gray-300" />
         <p>No author data to display!</p>
       </div>
@@ -62,10 +63,12 @@ defmodule LibrexWeb.Authors.IndexLive do
         id="authors-list"
         class="gap-6 lg:gap-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
       >
-        <li :for={author <- @authors} id={author.id}>
+        <li :for={author <- @page.results} id={author.id}>
           <.author_card author={author} />
         </li>
       </ul>
+
+      <.pagination_links page={@page} query_text={@query_text} sort_by={@sort_by} />
     </Layouts.app>
     """
   end
@@ -123,7 +126,43 @@ defmodule LibrexWeb.Authors.IndexLive do
     """
   end
 
-  def validate_sortby(key) do
+  def pagination_links(assigns) do
+    ~H"""
+    <div
+      :if={AshPhoenix.LiveView.prev_page?(@page) || AshPhoenix.LiveView.next_page?(@page)}
+      class="flex justify-center pt-8 space-x-4"
+    >
+      <.button
+        data-role="previous-page"
+        variant="primary"
+        patch={~p"/?#{query_string(@page, @query_text, @sort_by, "prev")}"}
+        disabled={!AshPhoenix.LiveView.prev_page?(@page)}
+      >
+        « Previous
+      </.button>
+      <.button
+        data-role="previous-page"
+        variant="primary"
+        patch={~p"/?#{query_string(@page, @query_text, @sort_by, "next")}"}
+        disabled={!AshPhoenix.LiveView.next_page?(@page)}
+      >
+        Next »
+      </.button>
+    </div>
+    """
+  end
+
+  defp query_string(page, query_text, sort_by, which) do
+    case AshPhoenix.LiveView.page_link_params(page, which) do
+      :invalid -> []
+      list -> list
+    end
+    |> Keyword.put(:q, query_text)
+    |> Keyword.put(:sort_by, sort_by)
+    |> remove_empty()
+  end
+
+  defp validate_sortby(key) do
     valid_keys = Enum.map(sort_options(), &elem(&1, 1))
 
     if key in valid_keys do
