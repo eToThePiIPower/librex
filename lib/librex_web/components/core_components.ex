@@ -202,8 +202,9 @@ defmodule LibrexWeb.CoreComponents do
   attr :options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
   attr :class, :string, default: nil, doc: "the input class to use over defaults"
+  attr :label_class, :string, default: nil, doc: "the label class to use over defaults"
+  attr :container_class, :string, default: nil, doc: "the container class to use over defaults"
   attr :error_class, :string, default: nil, doc: "the input error class to use over defaults"
-  attr :fieldset?, :boolean, default: true
 
   attr :rest, :global,
     include:
@@ -250,9 +251,9 @@ defmodule LibrexWeb.CoreComponents do
 
   def input(%{type: "select"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class={@container_class || "fieldset mb-2"}>
       <label>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class={@label_class || "label mb-1"}>{@label}</span>
         <select
           id={@id}
           name={@name}
@@ -293,7 +294,7 @@ defmodule LibrexWeb.CoreComponents do
     assigns = assign(assigns, :kbds, access_keys(assigns))
 
     ~H"""
-    <div class={@fieldset? && "fieldset mb-2"} data-fieldset-for={@name}>
+    <div class={@container_class || "fieldset mb-2"} data-fieldset-for={@name}>
       <label :if={@label} for={@id} class="label sr-only">{@label}</label>
       <div class="input">
         <.icon name={@icon} class="size-[1rem]" />
@@ -402,7 +403,7 @@ defmodule LibrexWeb.CoreComponents do
   def header(assigns) do
     ~H"""
     <header class={[
-      @actions != [] && "flex flex-col sm:flex-row items-center justify-between gap-6",
+      @actions != [] && "flex flex-col md:flex-row items-center justify-between gap-6",
       "pb-4"
     ]}>
       <div>

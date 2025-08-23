@@ -15,11 +15,15 @@ defmodule LibrexWeb.Authors.IndexLive do
   @impl true
   def handle_params(params, _url, socket) do
     query_text = Map.get(params, "q", "")
-    authors = Library.search_authors!(query_text)
+    page_params = AshPhoenix.LiveView.page_from_params(params, 12)
+    sort_by = Map.get(params, "sort_by") |> validate_sortby()
+
+    page = Library.search_authors!(query_text, page: page_params, query: [sort_input: sort_by])
 
     socket =
       socket
-      |> assign(:authors, authors)
+      |> assign(:page, page)
+      |> assign(:sort_by, sort_by)
       |> assign(:query_text, query_text)
 
     {:noreply, socket}
@@ -27,7 +31,12 @@ defmodule LibrexWeb.Authors.IndexLive do
 
   @impl true
   def handle_event("search", %{"query" => query_text}, socket) do
-    params = remove_empty(%{q: query_text})
+    params = remove_empty(%{q: query_text, sort_by: socket.assigns.sort_by})
+    {:noreply, push_patch(socket, to: ~p"/?#{params}")}
+  end
+
+  def handle_event("change-sortby", %{"sort_by" => sort_by}, socket) do
+    params = remove_empty(%{q: socket.assigns.query_text, sort_by: sort_by})
     {:noreply, push_patch(socket, to: ~p"/?#{params}")}
   end
 
@@ -39,13 +48,14 @@ defmodule LibrexWeb.Authors.IndexLive do
         <.h1>Authors</.h1>
         <:actions>
           <.search_box query={@query_text} data-role="artist-search" phx-submit="search" />
+          <.select_sortby selected={@sort_by} />
           <.button variant="primary" navigate={~p"/authors/new"}>
             <.icon name="hero-plus" /> New Author
           </.button>
         </:actions>
       </.header>
 
-      <div :if={@authors == []} class="p-8 text-center">
+      <div :if={@page.results == []} class="p-8 text-center">
         <.icon name="hero-face-frown" class="w-32 h-32 bg-gray-300" />
         <p>No author data to display!</p>
       </div>
@@ -54,10 +64,12 @@ defmodule LibrexWeb.Authors.IndexLive do
         id="authors-list"
         class="gap-6 lg:gap-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4"
       >
-        <li :for={author <- @authors} id={author.id}>
+        <li :for={author <- @page.results} id={author.id}>
           <.author_card author={author} />
         </li>
       </ul>
+
+      <.pagination_links page={@page} query_text={@query_text} sort_by={@sort_by} />
     </Layouts.app>
     """
   end
@@ -66,9 +78,23 @@ defmodule LibrexWeb.Authors.IndexLive do
     ~H"""
     <div data-role="author-card" class="card bg-base-100 shadow-xl">
       <.link navigate={~p"/authors/#{@author.id}"}>
-        <figure><img src="https://placehold.co/400x400" alt="Shoes" /></figure>
+        <figure>
+          <%= if @author.cover_image_url != nil do %>
+            <img
+              src={@author.cover_image_url}
+              class="aspect-square"
+              alt={"#{@author.name} has no book cover images."}
+            />
+          <% else %>
+            <img src="https://placehold.co/400x400" alt={"#{@author.name} has no book cover images."} />
+          <% end %>
+        </figure>
         <div class="card-body h-48">
           <h2 class="card-title">{@author.name}</h2>
+          <p class="font-thin">{@author.book_count} books listed</p>
+          <p :if={@author.latest_book_year} class="font-thin">
+            Last released in {@author.latest_book_year}
+          </p>
           <p>{@author.biography}</p>
         </div>
       </.link>
@@ -79,12 +105,11 @@ defmodule LibrexWeb.Authors.IndexLive do
   attr :query, :string, default: ""
   attr :rest, :global
 
-  @spec search_box(map()) :: Phoenix.LiveView.Rendered.t()
   def search_box(assigns) do
     ~H"""
     <form class="relative w-fit inline-block" {@rest}>
       <.input
-        fieldset?={false}
+        container_class="!inline-block"
         label="Search"
         icon="hero-magnifying-glass"
         name="query"
@@ -96,7 +121,81 @@ defmodule LibrexWeb.Authors.IndexLive do
     """
   end
 
+  def select_sortby(assigns) do
+    assigns = assign(assigns, :options, sort_options())
+
+    ~H"""
+    <form data-role="author-sort" class="hidden sm:inline" phx-change="change-sortby">
+      <.input
+        label="sort by:"
+        label_class="sr-only"
+        type="select"
+        id="sort_by"
+        name="sort_by"
+        options={@options}
+        value={@selected}
+        class="select"
+        container_class="!inline-block"
+      />
+    </form>
+    """
+  end
+
+  def pagination_links(assigns) do
+    ~H"""
+    <div
+      :if={AshPhoenix.LiveView.prev_page?(@page) || AshPhoenix.LiveView.next_page?(@page)}
+      class="flex justify-center pt-8 space-x-4"
+    >
+      <.button
+        data-role="previous-page"
+        variant="primary"
+        patch={~p"/?#{query_string(@page, @query_text, @sort_by, "prev")}"}
+        disabled={!AshPhoenix.LiveView.prev_page?(@page)}
+      >
+        « Previous
+      </.button>
+      <.button
+        data-role="previous-page"
+        variant="primary"
+        patch={~p"/?#{query_string(@page, @query_text, @sort_by, "next")}"}
+        disabled={!AshPhoenix.LiveView.next_page?(@page)}
+      >
+        Next »
+      </.button>
+    </div>
+    """
+  end
+
+  defp query_string(page, query_text, sort_by, which) do
+    case AshPhoenix.LiveView.page_link_params(page, which) do
+      :invalid -> []
+      list -> list
+    end
+    |> Keyword.put(:q, query_text)
+    |> Keyword.put(:sort_by, sort_by)
+    |> remove_empty()
+  end
+
+  defp validate_sortby(key) do
+    valid_keys = Enum.map(sort_options(), &elem(&1, 1))
+
+    if key in valid_keys do
+      key
+    else
+      List.first(valid_keys)
+    end
+  end
+
+  defp sort_options(),
+    do: [
+      {"name", "name"},
+      {"recently updated", "-updated_at"},
+      {"recently added", "-inserted_at"},
+      {"number of books", "-book_count"}
+    ]
+
   defp remove_empty(params) do
-    Enum.filter(params, fn {_key, value} -> value != "" end)
+    Enum.filter(params, fn {_key, value} -> value != nil && value != "" end)
   end
 end

@@ -4,8 +4,12 @@ defmodule Librex.Generator do
   use Ash.Generator
 
   def author(opts \\ []) do
+    sequence_prefix = opts[:prefix_name] || "Author"
+
     seed_generator(
-      %Librex.Library.Author{name: sequence(:author_name, &"Author #{&1}")},
+      %Librex.Library.Author{
+        name: sequence(:author_name, &"#{sequence_prefix} #{&1}")
+      },
       overrides: opts
     )
   end
