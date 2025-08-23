@@ -185,6 +185,7 @@ defmodule LibrexWeb.CoreComponents do
   attr :id, :any, default: nil
   attr :name, :any
   attr :label, :string, default: nil
+  attr :icon, :string, default: nil
   attr :value, :any
 
   attr :type, :string,
@@ -202,9 +203,11 @@ defmodule LibrexWeb.CoreComponents do
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
   attr :class, :string, default: nil, doc: "the input class to use over defaults"
   attr :error_class, :string, default: nil, doc: "the input error class to use over defaults"
+  attr :fieldset?, :boolean, default: true
 
   attr :rest, :global,
-    include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
+    include:
+      ~w(accesskey accept autocomplete capture cols disabled form list max maxlength min minlength
                 multiple pattern placeholder readonly required rows size step)
 
   def input(%{field: %Phoenix.HTML.FormField{} = field} = assigns) do
@@ -286,6 +289,33 @@ defmodule LibrexWeb.CoreComponents do
     """
   end
 
+  def input(%{icon: icon} = assigns) when icon != nil do
+    assigns = assign(assigns, :kbds, access_keys(assigns))
+
+    ~H"""
+    <div class={@fieldset? && "fieldset mb-2"} data-fieldset-for={@name}>
+      <label :if={@label} for={@id} class="label sr-only">{@label}</label>
+      <div class="input">
+        <.icon name={@icon} class="size-[1rem]" />
+        <input
+          type={@type}
+          name={@name}
+          id={@id}
+          value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+          placeholder={@label}
+          class={[
+            @class || "grow",
+            @errors != [] && (@error_class || "input-error")
+          ]}
+          {@rest}
+        />
+        <kbd :for={kbd <- @kbds} class="hidden sm:kbd sm:kbd-xs">{kbd}</kbd>
+      </div>
+      <.error :for={msg <- @errors}>{msg}</.error>
+    </div>
+    """
+  end
+
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
@@ -307,6 +337,14 @@ defmodule LibrexWeb.CoreComponents do
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
+  end
+
+  defp access_keys(assigns) do
+    if assigns.rest[:accesskey] do
+      ["alt", assigns.rest[:accesskey]]
+    else
+      []
+    end
   end
 
   def form_input_styles do
@@ -363,7 +401,10 @@ defmodule LibrexWeb.CoreComponents do
 
   def header(assigns) do
     ~H"""
-    <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
+    <header class={[
+      @actions != [] && "flex flex-col sm:flex-row items-center justify-between gap-6",
+      "pb-4"
+    ]}>
       <div>
         <h1 class="text-lg font-semibold leading-8">
           {render_slot(@inner_block)}
@@ -543,5 +584,23 @@ defmodule LibrexWeb.CoreComponents do
   """
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
+  end
+
+  slot :inner_block
+
+  def h1(assigns) do
+    ~H"""
+    <h1 class="text-3xl font-semibold leading-8 py-2">
+      {render_slot(@inner_block)}
+    </h1>
+    """
+  end
+
+  def h2(assigns) do
+    ~H"""
+    <h1 class="text-xl font-semibold">
+      {render_slot(@inner_block)}
+    </h1>
+    """
   end
 end

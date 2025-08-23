@@ -33,7 +33,7 @@ defmodule LibrexWeb.Books.FormLive do
     ~H"""
     <Layouts.app {assigns}>
       <.header>
-        <h1>{@page_title}</h1>
+        <.h1>{@page_title}</.h1>
       </.header>
 
       <.simple_form

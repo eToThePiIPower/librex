@@ -4,11 +4,24 @@ defmodule Librex.Library.Author do
   postgres do
     table "authors"
     repo Librex.Repo
+
+    custom_indexes do
+      index "name gin_trgm_ops", name: "authors_name_gin_index", using: "GIN"
+    end
   end
 
   actions do
     defaults [:create, :read, :update, :destroy]
     default_accept [:name, :biography]
+
+    read :search do
+      argument :query, :ci_string do
+        constraints allow_empty?: true
+        default ""
+      end
+
+      filter expr(contains(name, ^arg(:query)))
+    end
   end
 
   attributes do
