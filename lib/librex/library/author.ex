@@ -1,7 +1,22 @@
 defmodule Librex.Library.Author do
-  use Ash.Resource, otp_app: :librex, domain: Librex.Library, data_layer: AshPostgres.DataLayer
+  use Ash.Resource,
+    otp_app: :librex,
+    domain: Librex.Library,
+    data_layer: AshPostgres.DataLayer,
+    extensions: [AshJsonApi.Resource]
 
   alias Librex.Library.Book
+
+  json_api do
+    type "author"
+
+    routes do
+      base "/authors"
+
+      get :read
+      index :search
+    end
+  end
 
   postgres do
     table "authors"
