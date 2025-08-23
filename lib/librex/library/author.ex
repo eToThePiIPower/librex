@@ -1,6 +1,8 @@
 defmodule Librex.Library.Author do
   use Ash.Resource, otp_app: :librex, domain: Librex.Library, data_layer: AshPostgres.DataLayer
 
+  alias Librex.Library.Book
+
   postgres do
     table "authors"
     repo Librex.Repo
@@ -41,8 +43,14 @@ defmodule Librex.Library.Author do
   end
 
   relationships do
-    has_many :books, Librex.Library.Book do
+    has_many :books, Book do
       sort year_released: :desc
     end
+  end
+
+  aggregates do
+    count :book_count, :books
+    first :latest_book_year, :books, :year_released
+    first :cover_image_url, :books, :cover_image_url
   end
 end

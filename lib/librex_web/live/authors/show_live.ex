@@ -105,7 +105,18 @@ defmodule LibrexWeb.Authors.ShowLive do
   def book_card(assigns) do
     ~H"""
     <div id={"book-#{@book.id}"} class="card card-compact w-48 bg-base-100 shadow-xl">
-      <figure><img src="https://placehold.co/400x400" alt="Shoes" /></figure>
+      <figure>
+        <%= if @book.cover_image_url != nil do %>
+          <img
+            src={@book.cover_image_url}
+            class="aspect-square"
+            alt={"#{@book.title} has no book cover images."}
+          />
+        <% else %>
+          <img src="https://placehold.co/400x400" alt={"#{@book.title} has no book cover images."} />
+        <% end %>
+      </figure>
+
       <div class="card-body">
         <h2 class="card-title">{@book.title}</h2>
         <p>{@book.year_released}</p>

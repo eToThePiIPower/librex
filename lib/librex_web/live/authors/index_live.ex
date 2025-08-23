@@ -17,6 +17,7 @@ defmodule LibrexWeb.Authors.IndexLive do
     query_text = Map.get(params, "q", "")
     page_params = AshPhoenix.LiveView.page_from_params(params, 12)
     sort_by = Map.get(params, "sort_by") |> validate_sortby()
+
     page = Library.search_authors!(query_text, page: page_params, query: [sort_input: sort_by])
 
     socket =
@@ -77,9 +78,23 @@ defmodule LibrexWeb.Authors.IndexLive do
     ~H"""
     <div data-role="author-card" class="card bg-base-100 shadow-xl">
       <.link navigate={~p"/authors/#{@author.id}"}>
-        <figure><img src="https://placehold.co/400x400" alt="Shoes" /></figure>
+        <figure>
+          <%= if @author.cover_image_url != nil do %>
+            <img
+              src={@author.cover_image_url}
+              class="aspect-square"
+              alt={"#{@author.name} has no book cover images."}
+            />
+          <% else %>
+            <img src="https://placehold.co/400x400" alt={"#{@author.name} has no book cover images."} />
+          <% end %>
+        </figure>
         <div class="card-body h-48">
           <h2 class="card-title">{@author.name}</h2>
+          <p class="font-thin">{@author.book_count} books listed</p>
+          <p :if={@author.latest_book_year} class="font-thin">
+            Last released in {@author.latest_book_year}
+          </p>
           <p>{@author.biography}</p>
         </div>
       </.link>
