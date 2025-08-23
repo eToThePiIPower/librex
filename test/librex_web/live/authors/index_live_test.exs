@@ -25,9 +25,30 @@ defmodule LibrexWeb.Authors.IndexLiveTest do
 
       conn
       |> visit(~p"/")
+      |> assert_has("h2", count: 12)
       |> fill_in("Search", with: "THISONE")
       |> submit()
       |> assert_has("h2", count: 2)
+    end
+  end
+
+  describe "sort events" do
+    test "filters the list of authors", %{conn: conn} do
+      generate(author(name: "Alpha"))
+      generate(author(name: "Gamma"))
+      generate(author(name: "Beta"))
+
+      conn
+      |> visit(~p"/")
+      |> assert
+      |> select("sort by:", option: "name")
+      |> assert_has("#authors-list>li:nth-child(1)", text: "Alpha")
+      |> assert_has("#authors-list>li:nth-child(2)", text: "Beta")
+      |> assert_has("#authors-list>li:nth-child(3)", text: "Gamma")
+      |> select("sort by:", option: "recently added")
+      |> assert_has("#authors-list>li:nth-child(1)", text: "Beta")
+      |> assert_has("#authors-list>li:nth-child(2)", text: "Gamma")
+      |> assert_has("#authors-list>li:nth-child(3)", text: "Alpha")
     end
   end
 end

@@ -15,11 +15,13 @@ defmodule LibrexWeb.Authors.IndexLive do
   @impl true
   def handle_params(params, _url, socket) do
     query_text = Map.get(params, "q", "")
-    authors = Library.search_authors!(query_text)
+    sort_by = Map.get(params, "sort_by") |> validate_sortby()
+    authors = Library.search_authors!(query_text, query: [sort_input: sort_by])
 
     socket =
       socket
       |> assign(:authors, authors)
+      |> assign(:sort_by, sort_by)
       |> assign(:query_text, query_text)
 
     {:noreply, socket}
@@ -27,7 +29,12 @@ defmodule LibrexWeb.Authors.IndexLive do
 
   @impl true
   def handle_event("search", %{"query" => query_text}, socket) do
-    params = remove_empty(%{q: query_text})
+    params = remove_empty(%{q: query_text, sort_by: socket.assigns.sort_by})
+    {:noreply, push_patch(socket, to: ~p"/?#{params}")}
+  end
+
+  def handle_event("change-sortby", %{"sort_by" => sort_by}, socket) do
+    params = remove_empty(%{q: socket.assigns.query_text, sort_by: sort_by})
     {:noreply, push_patch(socket, to: ~p"/?#{params}")}
   end
 
@@ -39,6 +46,7 @@ defmodule LibrexWeb.Authors.IndexLive do
         <.h1>Authors</.h1>
         <:actions>
           <.search_box query={@query_text} data-role="artist-search" phx-submit="search" />
+          <.select_sortby selected={@sort_by} />
           <.button variant="primary" navigate={~p"/authors/new"}>
             <.icon name="hero-plus" /> New Author
           </.button>
@@ -79,12 +87,11 @@ defmodule LibrexWeb.Authors.IndexLive do
   attr :query, :string, default: ""
   attr :rest, :global
 
-  @spec search_box(map()) :: Phoenix.LiveView.Rendered.t()
   def search_box(assigns) do
     ~H"""
     <form class="relative w-fit inline-block" {@rest}>
       <.input
-        fieldset?={false}
+        container_class="!inline-block"
         label="Search"
         icon="hero-magnifying-glass"
         name="query"
@@ -96,7 +103,44 @@ defmodule LibrexWeb.Authors.IndexLive do
     """
   end
 
+  def select_sortby(assigns) do
+    assigns = assign(assigns, :options, sort_options())
+
+    ~H"""
+    <form data-role="author-sort" class="hidden sm:inline" phx-change="change-sortby">
+      <.input
+        label="sort by:"
+        label_class="sr-only"
+        type="select"
+        id="sort_by"
+        name="sort_by"
+        options={@options}
+        value={@selected}
+        class="select"
+        container_class="!inline-block"
+      />
+    </form>
+    """
+  end
+
+  def validate_sortby(key) do
+    valid_keys = Enum.map(sort_options(), &elem(&1, 1))
+
+    if key in valid_keys do
+      key
+    else
+      List.first(valid_keys)
+    end
+  end
+
+  defp sort_options(),
+    do: [
+      {"name", "name"},
+      {"recently updated", "-updated_at"},
+      {"recently added", "-inserted_at"}
+    ]
+
   defp remove_empty(params) do
-    Enum.filter(params, fn {_key, value} -> value != "" end)
+    Enum.filter(params, fn {_key, value} -> value != nil && value != "" end)
   end
 end
