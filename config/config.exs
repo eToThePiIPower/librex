@@ -23,6 +23,8 @@ config :spark,
     remove_parens?: true,
     "Ash.Resource": [
       section_order: [
+        :authentication,
+        :tokens,
         :postgres,
         :resource,
         :code_interface,
@@ -46,7 +48,7 @@ config :spark,
 config :librex,
   ecto_repos: [Librex.Repo],
   generators: [timestamp_type: :utc_datetime, binary_id: true],
-  ash_domains: [Librex.Library]
+  ash_domains: [Librex.Accounts, Librex.Library]
 
 # Configures the endpoint
 config :librex, LibrexWeb.Endpoint,

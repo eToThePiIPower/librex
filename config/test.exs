@@ -1,4 +1,6 @@
 import Config
+config :librex, token_signing_secret: "WwY3ODQMv9PNfMy2AJjzHVVQz5i3lPaU"
+config :bcrypt_elixir, log_rounds: 1
 config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true
 
 # Configure your database
