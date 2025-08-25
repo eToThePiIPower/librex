@@ -3,6 +3,8 @@ defmodule LibrexWeb.Authors.IndexLive do
 
   alias Librex.Library
 
+  on_mount {LibrexWeb.LiveUserAuth, :live_user_optional}
+
   @impl true
   def mount(_params, _session, socket) do
     socket =
@@ -43,7 +45,7 @@ defmodule LibrexWeb.Authors.IndexLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app {assigns}>
       <.header>
         <.h1>Authors</.h1>
         <:actions>

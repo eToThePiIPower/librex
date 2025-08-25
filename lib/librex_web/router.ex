@@ -1,6 +1,10 @@
 defmodule LibrexWeb.Router do
   use LibrexWeb, :router
 
+  use AshAuthentication.Phoenix.Router
+
+  import AshAuthentication.Plug.Helpers
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,23 +12,60 @@ defmodule LibrexWeb.Router do
     plug :put_root_layout, html: {LibrexWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :load_from_session
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :load_from_bearer
+    plug :set_actor, :user
   end
 
   scope "/", LibrexWeb do
     pipe_through :browser
 
-    live "/", Authors.IndexLive, :index
+    ash_authentication_live_session :authenticated_routes do
+      live "/", Authors.IndexLive, :index
 
-    live "/authors/new", Authors.FormLive, :new
-    live "/authors/:id/edit", Authors.FormLive, :new
-    live "/authors/:id", Authors.ShowLive, :show
+      live "/authors/new", Authors.FormLive, :new
+      live "/authors/:id/edit", Authors.FormLive, :new
+      live "/authors/:id", Authors.ShowLive, :show
 
-    live "/authors/:author_id/books/new", Books.FormLive, :new
-    live "/books/:id/edit", Books.FormLive, :edit
+      live "/authors/:author_id/books/new", Books.FormLive, :new
+      live "/books/:id/edit", Books.FormLive, :edit
+    end
+  end
+
+  scope "/", LibrexWeb do
+    pipe_through :browser
+
+    auth_routes AuthController, Librex.Accounts.User, path: "/auth"
+    sign_out_route AuthController
+
+    # Remove these if you'd like to use your own authentication views
+    sign_in_route register_path: "/register",
+                  reset_path: "/reset",
+                  auth_routes_prefix: "/auth",
+                  on_mount: [{LibrexWeb.LiveUserAuth, :live_no_user}],
+                  overrides: [
+                    LibrexWeb.AuthOverrides,
+                    AshAuthentication.Phoenix.Overrides.Default
+                  ]
+
+    # Remove this if you do not want to use the reset password feature
+    reset_route auth_routes_prefix: "/auth",
+                overrides: [LibrexWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+
+    # Remove this if you do not use the confirmation strategy
+    confirm_route Librex.Accounts.User, :confirm_new_user,
+      auth_routes_prefix: "/auth",
+      overrides: [LibrexWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+
+    # Remove this if you do not use the magic link strategy.
+    magic_sign_in_route(Librex.Accounts.User, :magic_link,
+      auth_routes_prefix: "/auth",
+      overrides: [LibrexWeb.AuthOverrides, AshAuthentication.Phoenix.Overrides.Default]
+    )
   end
 
   # Other scopes may use custom stacks.

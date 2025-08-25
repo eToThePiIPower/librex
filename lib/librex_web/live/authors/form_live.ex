@@ -3,6 +3,8 @@ defmodule LibrexWeb.Authors.FormLive do
 
   alias Librex.Library
 
+  on_mount {LibrexWeb.LiveUserAuth, :live_user_optional}
+
   @impl true
   def mount(%{"id" => author_id}, _session, socket) do
     {:ok, author} = Library.get_author_by_id(author_id)

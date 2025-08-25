@@ -4,6 +4,8 @@ defmodule LibrexWeb.Authors.ShowLive do
 
   alias Librex.Library
 
+  on_mount {LibrexWeb.LiveUserAuth, :live_user_optional}
+
   def mount(_params, _session, socket) do
     {:ok, socket}
   end
