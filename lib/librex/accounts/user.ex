@@ -61,6 +61,10 @@ defmodule Librex.Accounts.User do
       prepare AshAuthentication.Preparations.FilterBySubject
     end
 
+    update :set_role do
+      accept [:role]
+    end
+
     update :change_password do
       # Use this action to allow users to change their password by providing
       # their current password and a new password.
@@ -233,6 +237,10 @@ defmodule Librex.Accounts.User do
       authorize_if always()
     end
 
+    bypass action(:set_role) do
+      authorize_if actor_attribute_equals(:role, :admin)
+    end
+
     policy always() do
       forbid_if always()
     end
@@ -249,6 +257,11 @@ defmodule Librex.Accounts.User do
     attribute :hashed_password, :string do
       allow_nil? false
       sensitive? true
+    end
+
+    attribute :role, Librex.Accounts.Role do
+      allow_nil? false
+      default :user
     end
 
     attribute :confirmed_at, :utc_datetime_usec
