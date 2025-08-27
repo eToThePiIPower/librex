@@ -13,15 +13,6 @@ defmodule LibrexWeb.Authors.FormLiveTest do
       |> assert_has(flash(:info), text: "Author saved successfully")
     end
 
-    test "editors succeed when valid details are entered", %{conn: conn} do
-      conn
-      |> create_and_log_in_user(:editor)
-      |> visit(~p"/authors/new")
-      |> fill_in("Name", with: "Homer")
-      |> click_button("Save")
-      |> assert_has(flash(:info), text: "Author saved successfully")
-    end
-
     test "shows validation errors", %{conn: conn} do
       conn
       |> create_and_log_in_user(:admin)
@@ -42,11 +33,25 @@ defmodule LibrexWeb.Authors.FormLiveTest do
   end
 
   describe "updating an existing author" do
-    test "succeeds when valid details are entered", %{conn: conn} do
+    test "admin succeeds when valid details are entered", %{conn: conn} do
       author = generate(author(name: "Obiwan Kenobi"))
 
       conn
       |> create_and_log_in_user(:admin)
+      |> visit(~p"/authors/#{author}/edit")
+      |> fill_in("Name", with: "Ben")
+      |> click_button("Save")
+      |> assert_has(flash(:info), text: "Author saved successfully")
+
+      {:ok, updated_author} = Library.get_author_by_id(author.id)
+      assert updated_author.name == "Ben"
+    end
+
+    test "editor succeeds when valid details are entered", %{conn: conn} do
+      author = generate(author(name: "Obiwan Kenobi"))
+
+      conn
+      |> create_and_log_in_user(:editor)
       |> visit(~p"/authors/#{author}/edit")
       |> fill_in("Name", with: "Ben")
       |> click_button("Save")

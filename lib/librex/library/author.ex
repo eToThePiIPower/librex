@@ -36,7 +36,6 @@ defmodule Librex.Library.Author do
   policies do
     policy action(:create) do
       authorize_if actor_attribute_equals(:role, :admin)
-      authorize_if actor_attribute_equals(:role, :editor)
     end
 
     policy action_type(:read) do
