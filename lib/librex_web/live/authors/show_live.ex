@@ -71,6 +71,7 @@ defmodule LibrexWeb.Authors.ShowLive do
         </.h1>
         <:actions>
           <.button
+            :if={Library.can_create_book?(@current_user)}
             class="btn btn-xs sm:btn-md btn-primary"
             navigate={~p"/authors/#{@author}/books/new"}
           >
@@ -100,7 +101,7 @@ defmodule LibrexWeb.Authors.ShowLive do
 
       <div class="carousel carousel-center w-full p-4 space-x-4 rounded-box">
         <div :for={book <- @author.books} class="carousel-item">
-          <.book_card book={book} />
+          <.book_card book={book} current_user={@current_user} />
         </div>
       </div>
     </Layouts.app>
@@ -127,8 +128,15 @@ defmodule LibrexWeb.Authors.ShowLive do
         <p>{@book.year_released}</p>
       </div>
       <div class="card-actions">
-        <.button navigate={~p"/books/#{@book}/edit"} class="btn btn-sm btn-block">Edit</.button>
         <.button
+          :if={Library.can_update_book?(@current_user, @book)}
+          navigate={~p"/books/#{@book}/edit"}
+          class="btn btn-sm btn-block"
+        >
+          Edit
+        </.button>
+        <.button
+          :if={Library.can_destroy_book?(@current_user, @book)}
           class="btn btn-sm btn-error btn-soft btn-block"
           variant="danger"
           phx-click="destroy-book"
