@@ -1,5 +1,10 @@
 defmodule Librex.Library.Book do
-  use Ash.Resource, otp_app: :librex, domain: Librex.Library, data_layer: AshPostgres.DataLayer
+  @moduledoc "Resource describing an Book belonging to an Book"
+  use Ash.Resource,
+    otp_app: :librex,
+    domain: Librex.Library,
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer]
 
   postgres do
     table "books"
@@ -20,6 +25,29 @@ defmodule Librex.Library.Book do
     update :update do
       accept [:title, :year_released, :cover_image_url]
     end
+  end
+
+  policies do
+    bypass actor_attribute_equals(:role, :admin) do
+      authorize_if always()
+    end
+
+    policy action(:create) do
+      authorize_if actor_attribute_equals(:role, :editor)
+    end
+
+    policy action_type(:read) do
+      authorize_if always()
+    end
+
+    policy action([:update, :destroy]) do
+      authorize_if expr(^actor(:role) == :editor and created_by_id == ^actor(:id))
+    end
+  end
+
+  changes do
+    change relate_actor(:created_by, allow_nil?: true), on: [:create]
+    change relate_actor(:updated_by, allow_nil?: true)
   end
 
   validations do
@@ -69,6 +97,9 @@ defmodule Librex.Library.Book do
     belongs_to :author, Librex.Library.Author do
       allow_nil? false
     end
+
+    belongs_to :created_by, Librex.Accounts.User
+    belongs_to :updated_by, Librex.Accounts.User
   end
 
   identities do

@@ -42,7 +42,7 @@ defmodule LibrexWeb.Authors.ShowLive do
 
   def handle_event("destroy-book", %{"book_id" => book_id}, socket) do
     socket =
-      case Library.destroy_book(book_id) do
+      case Library.destroy_book(book_id, actor: socket.assigns.current_user) do
         :ok ->
           socket
           |> update(:author, fn author ->

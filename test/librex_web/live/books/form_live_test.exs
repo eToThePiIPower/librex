@@ -8,6 +8,7 @@ defmodule LibrexWeb.Books.FormLiveTest do
       author = generate(author(name: "Homer"))
 
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/authors/#{author}/books/new")
       |> fill_in("Title", with: "Iliad")
       |> fill_in("Year Released", with: "-800")
@@ -20,6 +21,7 @@ defmodule LibrexWeb.Books.FormLiveTest do
       author = generate(author(name: "Homer"))
 
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/authors/#{author}/books/new")
       |> fill_in("Title", with: "")
       |> fill_in("Year Released", with: "-2101")
@@ -36,6 +38,7 @@ defmodule LibrexWeb.Books.FormLiveTest do
       author = generate(author(name: "Homer"))
 
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/authors/#{author}/books/new")
       |> fill_in("Title", with: "")
       |> fill_in("Year Released", with: "-2101")
@@ -48,6 +51,7 @@ defmodule LibrexWeb.Books.FormLiveTest do
       _book = generate(book(author_id: author.id, title: "Iliad", year_released: -800))
 
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/authors/#{author}/books/new")
       |> fill_in("Title", with: "Iliad")
       |> fill_in("Year Released", with: "-790")
@@ -63,6 +67,7 @@ defmodule LibrexWeb.Books.FormLiveTest do
       book = generate(book(author_id: author.id, title: "Iliad", year_released: -800))
 
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/books/#{book}/edit")
       |> fill_in("Title", with: "Odyssey")
       |> fill_in("Year Released", with: "-750")
@@ -79,6 +84,7 @@ defmodule LibrexWeb.Books.FormLiveTest do
       book = generate(book(author_id: author.id, title: "Iliad", year_released: -800))
 
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/books/#{book}/edit")
       |> fill_in("Year Released", with: "2200")
       |> fill_in("Cover image URL", with: "http://no_extension")
@@ -95,6 +101,7 @@ defmodule LibrexWeb.Books.FormLiveTest do
     book = generate(book(author_id: author.id, title: "Iliad", year_released: -800))
 
     conn
+    |> create_and_log_in_user(:admin)
     |> visit(~p"/books/#{book}/edit")
     |> fill_in("Title", with: "Odyssey")
     |> fill_in("Year Released", with: "-2101")
