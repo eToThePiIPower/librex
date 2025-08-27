@@ -38,4 +38,35 @@ defmodule LibrexWeb.ConnCase do
     Librex.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
+
+  @doc """
+  Setup helper that creates and then logs in a user.
+
+      setup :create_and_log_in_user(:admin)
+
+  It stores an updated `conn` and registered `user` in the test context.
+  """
+  def create_and_log_in_user(conn, role \\ :user)
+
+  def create_and_log_in_user(%{conn: conn}, role) do
+    user = Librex.Generator.generate(Librex.Generator.user(role: role))
+    %{conn: log_in_user(conn, user), user: user}
+  end
+
+  def create_and_log_in_user(%Plug.Conn{} = conn, role) do
+    %{conn: conn}
+    |> create_and_log_in_user(role)
+    |> Map.fetch!(:conn)
+  end
+
+  @doc """
+  Logs the given user into the `conn`.
+
+  Returns an updated `conn`.
+  """
+  def log_in_user(conn, user) do
+    conn
+    |> Phoenix.ConnTest.init_test_session(%{})
+    |> AshAuthentication.Plug.Helpers.store_in_session(user)
+  end
 end

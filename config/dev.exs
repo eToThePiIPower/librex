@@ -65,7 +65,7 @@ config :librex, LibrexWeb.Endpoint,
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :librex, dev_routes: true
+config :librex, dev_routes: true, token_signing_secret: "Q/jm+q1DJv3MB1L+oYvS6Os96ObWzFL0"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"

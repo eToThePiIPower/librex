@@ -45,9 +45,14 @@ defmodule LibrexWeb.Layouts do
         <.link navigate={~p"/"} class="btn btn-ghost text-xl">Librex</.link>
       </div>
       <div class="flex-none">
-        <div class="scale-sm">
-          <.theme_toggle />
-        </div>
+        <ul class="menu menu-horizontal px-1">
+          <.user_info current_user={@current_user} />
+          <li>
+            <div class="scale-sm">
+              <.theme_toggle />
+            </div>
+          </li>
+        </ul>
       </div>
     </header>
 
@@ -138,6 +143,26 @@ defmodule LibrexWeb.Layouts do
         <.icon name="hero-moon-micro" class="size-3 opacity-75 hover:opacity-100" />
       </button>
     </div>
+    """
+  end
+
+  def user_info(assigns) do
+    ~H"""
+    <%= if @current_user do %>
+      <li>
+        <details>
+          <summary>
+            {@current_user.email}
+          </summary>
+          <ul class="p-2 bg-base-100">
+            <li><.link navigate={~p"/sign-out"}>Sign out</.link></li>
+          </ul>
+        </details>
+      </li>
+    <% else %>
+      <li><.link navigate={~p"/sign-in"}>Sign in</.link></li>
+      <li><.link class="btn btn-primary" navigate={~p"/register"}>Sign up</.link></li>
+    <% end %>
     """
   end
 end

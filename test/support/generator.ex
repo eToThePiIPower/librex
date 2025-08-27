@@ -28,4 +28,22 @@ defmodule Librex.Generator do
       overrides: opts
     )
   end
+
+  def user(opts \\ []) do
+    changeset_generator(
+      Librex.Accounts.User,
+      :register_with_password,
+      defaults: [
+        email: sequence(:user_email, &"user#{&1}@example.com"),
+        password: "password",
+        password_confirmation: "password"
+      ],
+      authorize?: false,
+      overrides: opts,
+      after_action: fn user ->
+        role = opts[:role] || :user
+        Librex.Accounts.set_user_role!(user, role, authorize?: false)
+      end
+    )
+  end
 end

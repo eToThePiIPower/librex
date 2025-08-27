@@ -4,12 +4,15 @@ defmodule LibrexWeb.Authors.ShowLive do
 
   alias Librex.Library
 
+  on_mount {LibrexWeb.LiveUserAuth, :live_user_optional}
+
   def mount(_params, _session, socket) do
     {:ok, socket}
   end
 
   def handle_params(%{"id" => author_id}, _url, socket) do
-    author = Library.get_author_by_id!(author_id, load: [:books])
+    author =
+      Library.get_author_by_id!(author_id, load: [:books], actor: socket.assigns.current_user)
 
     socket =
       socket
@@ -21,7 +24,7 @@ defmodule LibrexWeb.Authors.ShowLive do
 
   def handle_event("destroy-author", _params, socket) do
     socket =
-      case Library.destroy_author(socket.assigns.author) do
+      case Library.destroy_author(socket.assigns.author, actor: socket.assigns.current_user) do
         :ok ->
           socket
           |> put_flash(:info, "Author deleted successfully")
@@ -39,7 +42,7 @@ defmodule LibrexWeb.Authors.ShowLive do
 
   def handle_event("destroy-book", %{"book_id" => book_id}, socket) do
     socket =
-      case Library.destroy_book(book_id) do
+      case Library.destroy_book(book_id, actor: socket.assigns.current_user) do
         :ok ->
           socket
           |> update(:author, fn author ->
@@ -68,12 +71,14 @@ defmodule LibrexWeb.Authors.ShowLive do
         </.h1>
         <:actions>
           <.button
+            :if={Library.can_create_book?(@current_user)}
             class="btn btn-xs sm:btn-md btn-primary"
             navigate={~p"/authors/#{@author}/books/new"}
           >
             <.icon name="hero-plus" /> Add a Book
           </.button>
           <.button
+            :if={Library.can_update_author?(@current_user, @author)}
             class="btn btn-xs sm:btn-md btn-soft"
             variant="primary"
             navigate={~p"/authors/#{@author}/edit"}
@@ -81,6 +86,7 @@ defmodule LibrexWeb.Authors.ShowLive do
             <.icon name="hero-plus" /> Edit Author
           </.button>
           <.button
+            :if={Library.can_destroy_author?(@current_user, @author)}
             class="btn btn-xs sm:btn-md btn-error btn-soft"
             variant="danger"
             phx-click="destroy-author"
@@ -95,7 +101,7 @@ defmodule LibrexWeb.Authors.ShowLive do
 
       <div class="carousel carousel-center w-full p-4 space-x-4 rounded-box">
         <div :for={book <- @author.books} class="carousel-item">
-          <.book_card book={book} />
+          <.book_card book={book} current_user={@current_user} />
         </div>
       </div>
     </Layouts.app>
@@ -122,8 +128,15 @@ defmodule LibrexWeb.Authors.ShowLive do
         <p>{@book.year_released}</p>
       </div>
       <div class="card-actions">
-        <.button navigate={~p"/books/#{@book}/edit"} class="btn btn-sm btn-block">Edit</.button>
         <.button
+          :if={Library.can_update_book?(@current_user, @book)}
+          navigate={~p"/books/#{@book}/edit"}
+          class="btn btn-sm btn-block"
+        >
+          Edit
+        </.button>
+        <.button
+          :if={Library.can_destroy_book?(@current_user, @book)}
           class="btn btn-sm btn-error btn-soft btn-block"
           variant="danger"
           phx-click="destroy-book"

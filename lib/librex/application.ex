@@ -15,7 +15,8 @@ defmodule Librex.Application do
       # Start a worker by calling: Librex.Worker.start_link(arg)
       # {Librex.Worker, arg},
       # Start to serve requests, typically the last entry
-      LibrexWeb.Endpoint
+      LibrexWeb.Endpoint,
+      {AshAuthentication.Supervisor, [otp_app: :librex]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

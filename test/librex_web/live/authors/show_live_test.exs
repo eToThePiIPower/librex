@@ -18,6 +18,7 @@ defmodule LibrexWeb.Authors.ShowLiveTest do
       author = generate(author())
 
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/authors/#{author}")
       |> click_button("Delete Author")
       |> assert_has(flash(:info), text: "Author deleted successfully")
@@ -30,6 +31,7 @@ defmodule LibrexWeb.Authors.ShowLiveTest do
       generate_many(book(author_id: author.id), 10)
 
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/authors/#{author}")
       |> click_button("Delete Author")
       |> assert_has(flash(:info), text: "Author deleted successfully")
@@ -42,6 +44,7 @@ defmodule LibrexWeb.Authors.ShowLiveTest do
       book = generate(book(author_id: author.id))
 
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/authors/#{author}")
       |> within("#book-#{book.id}", fn conn ->
         conn

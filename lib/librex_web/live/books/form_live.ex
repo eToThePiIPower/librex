@@ -3,9 +3,11 @@ defmodule LibrexWeb.Books.FormLive do
 
   alias Librex.Library
 
+  on_mount {LibrexWeb.LiveUserAuth, :live_user_optional}
+
   def mount(%{"author_id" => author_id}, _session, socket) do
-    author = Library.get_author_by_id!(author_id)
-    form = Library.form_to_create_book(author_id)
+    author = Library.get_author_by_id!(author_id, actor: socket.assigns.current_user)
+    form = Library.form_to_create_book(author_id, actor: socket.assigns.current_user)
 
     socket =
       socket
@@ -17,8 +19,8 @@ defmodule LibrexWeb.Books.FormLive do
   end
 
   def mount(%{"id" => book_id}, _session, socket) do
-    book = Library.get_book_by_id!(book_id, load: [:author])
-    form = Library.form_to_update_book(book)
+    book = Library.get_book_by_id!(book_id, load: [:author], actor: socket.assigns.current_user)
+    form = Library.form_to_update_book(book, actor: socket.assigns.current_user)
 
     socket =
       socket

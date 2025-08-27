@@ -3,6 +3,8 @@ defmodule LibrexWeb.Authors.IndexLive do
 
   alias Librex.Library
 
+  on_mount {LibrexWeb.LiveUserAuth, :live_user_optional}
+
   @impl true
   def mount(_params, _session, socket) do
     socket =
@@ -18,7 +20,12 @@ defmodule LibrexWeb.Authors.IndexLive do
     page_params = AshPhoenix.LiveView.page_from_params(params, 12)
     sort_by = Map.get(params, "sort_by") |> validate_sortby()
 
-    page = Library.search_authors!(query_text, page: page_params, query: [sort_input: sort_by])
+    page =
+      Library.search_authors!(query_text,
+        page: page_params,
+        query: [sort_input: sort_by],
+        actor: socket.assigns.current_user
+      )
 
     socket =
       socket
@@ -43,13 +50,17 @@ defmodule LibrexWeb.Authors.IndexLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app {assigns}>
       <.header>
         <.h1>Authors</.h1>
         <:actions>
           <.search_box query={@query_text} data-role="artist-search" phx-submit="search" />
           <.select_sortby selected={@sort_by} />
-          <.button variant="primary" navigate={~p"/authors/new"}>
+          <.button
+            :if={Library.can_create_author?(@current_user)}
+            variant="primary"
+            navigate={~p"/authors/new"}
+          >
             <.icon name="hero-plus" /> New Author
           </.button>
         </:actions>
