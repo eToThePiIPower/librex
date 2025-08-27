@@ -8,23 +8,42 @@ defmodule LibrexWeb.Authors.FormLive do
   @impl true
   def mount(%{"id" => author_id}, _session, socket) do
     author = Library.get_author_by_id!(author_id, actor: socket.assigns.current_user)
-    form = Librex.Library.form_to_update_author(author, actor: socket.assigns.current_user)
 
     socket =
-      socket
-      |> assign(:form, to_form(form))
-      |> assign(:page_title, "Updating Author")
+      try do
+        form =
+          Librex.Library.form_to_update_author(author, actor: socket.assigns.current_user)
+          |> AshPhoenix.Form.ensure_can_submit!()
+
+        socket
+        |> assign(:form, to_form(form))
+        |> assign(:page_title, "Updating Author")
+      rescue
+        Ash.Error.Forbidden ->
+          socket
+          |> put_flash(:error, "Forbidden")
+          |> push_navigate(to: ~p"/")
+      end
 
     {:ok, socket}
   end
 
   def mount(_params, _session, socket) do
-    form = Librex.Library.form_to_create_author(actor: socket.assigns.current_user)
-
     socket =
-      socket
-      |> assign(:form, to_form(form))
-      |> assign(:page_title, "New Author")
+      try do
+        form =
+          Librex.Library.form_to_create_author(actor: socket.assigns.current_user)
+          |> AshPhoenix.Form.ensure_can_submit!()
+
+        socket
+        |> assign(:form, to_form(form))
+        |> assign(:page_title, "New Author")
+      rescue
+        Ash.Error.Forbidden ->
+          socket
+          |> put_flash(:error, "Forbidden")
+          |> push_navigate(to: ~p"/")
+      end
 
     {:ok, socket}
   end
