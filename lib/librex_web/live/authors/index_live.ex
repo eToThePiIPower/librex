@@ -56,7 +56,11 @@ defmodule LibrexWeb.Authors.IndexLive do
         <:actions>
           <.search_box query={@query_text} data-role="artist-search" phx-submit="search" />
           <.select_sortby selected={@sort_by} />
-          <.button variant="primary" navigate={~p"/authors/new"}>
+          <.button
+            :if={Library.can_create_author?(@current_user)}
+            variant="primary"
+            navigate={~p"/authors/new"}
+          >
             <.icon name="hero-plus" /> New Author
           </.button>
         </:actions>

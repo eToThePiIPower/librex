@@ -77,6 +77,7 @@ defmodule LibrexWeb.Authors.ShowLive do
             <.icon name="hero-plus" /> Add a Book
           </.button>
           <.button
+            :if={Library.can_update_author?(@current_user, @author)}
             class="btn btn-xs sm:btn-md btn-soft"
             variant="primary"
             navigate={~p"/authors/#{@author}/edit"}
@@ -84,6 +85,7 @@ defmodule LibrexWeb.Authors.ShowLive do
             <.icon name="hero-plus" /> Edit Author
           </.button>
           <.button
+            :if={Library.can_destroy_author?(@current_user, @author)}
             class="btn btn-xs sm:btn-md btn-error btn-soft"
             variant="danger"
             phx-click="destroy-author"
