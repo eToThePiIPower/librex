@@ -20,7 +20,12 @@ defmodule LibrexWeb.Authors.IndexLive do
     page_params = AshPhoenix.LiveView.page_from_params(params, 12)
     sort_by = Map.get(params, "sort_by") |> validate_sortby()
 
-    page = Library.search_authors!(query_text, page: page_params, query: [sort_input: sort_by])
+    page =
+      Library.search_authors!(query_text,
+        page: page_params,
+        query: [sort_input: sort_by],
+        actor: socket.assigns.current_user
+      )
 
     socket =
       socket

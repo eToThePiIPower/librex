@@ -11,7 +11,8 @@ defmodule LibrexWeb.Authors.ShowLive do
   end
 
   def handle_params(%{"id" => author_id}, _url, socket) do
-    author = Library.get_author_by_id!(author_id, load: [:books])
+    author =
+      Library.get_author_by_id!(author_id, load: [:books], actor: socket.assigns.current_user)
 
     socket =
       socket
@@ -23,7 +24,7 @@ defmodule LibrexWeb.Authors.ShowLive do
 
   def handle_event("destroy-author", _params, socket) do
     socket =
-      case Library.destroy_author(socket.assigns.author) do
+      case Library.destroy_author(socket.assigns.author, actor: socket.assigns.current_user) do
         :ok ->
           socket
           |> put_flash(:info, "Author deleted successfully")

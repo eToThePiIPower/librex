@@ -4,8 +4,18 @@ defmodule LibrexWeb.Authors.FormLiveTest do
   alias Librex.Library
 
   describe "creating a new author" do
-    test "succeeds when valid details are entered", %{conn: conn} do
+    test "admins succeed when valid details are entered", %{conn: conn} do
       conn
+      |> create_and_log_in_user(:admin)
+      |> visit(~p"/authors/new")
+      |> fill_in("Name", with: "Homer")
+      |> click_button("Save")
+      |> assert_has(flash(:info), text: "Author saved successfully")
+    end
+
+    test "editors succeed when valid details are entered", %{conn: conn} do
+      conn
+      |> create_and_log_in_user(:editor)
       |> visit(~p"/authors/new")
       |> fill_in("Name", with: "Homer")
       |> click_button("Save")
@@ -14,6 +24,7 @@ defmodule LibrexWeb.Authors.FormLiveTest do
 
     test "shows validation errors", %{conn: conn} do
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/authors/new")
       |> fill_in("Name", with: "Homer")
       |> fill_in("Name", with: "")
@@ -22,6 +33,7 @@ defmodule LibrexWeb.Authors.FormLiveTest do
 
     test "fails when invalid details are entered", %{conn: conn} do
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/authors/new")
       |> fill_in("Name", with: "")
       |> click_button("Save")
@@ -34,6 +46,7 @@ defmodule LibrexWeb.Authors.FormLiveTest do
       author = generate(author(name: "Obiwan Kenobi"))
 
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/authors/#{author}/edit")
       |> fill_in("Name", with: "Ben")
       |> click_button("Save")
@@ -47,6 +60,7 @@ defmodule LibrexWeb.Authors.FormLiveTest do
       author = generate(author(name: "Obiwan Kenobi"))
 
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/authors/#{author}/edit")
       |> fill_in("Name", with: "Ben")
       |> fill_in("Name", with: "")
@@ -57,6 +71,7 @@ defmodule LibrexWeb.Authors.FormLiveTest do
       author = generate(author(name: "Obiwan Kenobi"))
 
       conn
+      |> create_and_log_in_user(:admin)
       |> visit(~p"/authors/#{author}/edit")
       |> fill_in("Name", with: "")
       |> click_button("Save")

@@ -7,8 +7,8 @@ defmodule LibrexWeb.Authors.FormLive do
 
   @impl true
   def mount(%{"id" => author_id}, _session, socket) do
-    {:ok, author} = Library.get_author_by_id(author_id)
-    form = Librex.Library.form_to_update_author(author)
+    author = Library.get_author_by_id!(author_id, actor: socket.assigns.current_user)
+    form = Librex.Library.form_to_update_author(author, actor: socket.assigns.current_user)
 
     socket =
       socket
@@ -19,7 +19,7 @@ defmodule LibrexWeb.Authors.FormLive do
   end
 
   def mount(_params, _session, socket) do
-    form = Librex.Library.form_to_create_author()
+    form = Librex.Library.form_to_create_author(actor: socket.assigns.current_user)
 
     socket =
       socket

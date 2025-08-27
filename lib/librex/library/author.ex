@@ -1,5 +1,10 @@
 defmodule Librex.Library.Author do
-  use Ash.Resource, otp_app: :librex, domain: Librex.Library, data_layer: AshPostgres.DataLayer
+  @moduledoc "Resource describing an Author of a Book"
+  use Ash.Resource,
+    otp_app: :librex,
+    domain: Librex.Library,
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer]
 
   alias Librex.Library.Book
 
@@ -25,6 +30,26 @@ defmodule Librex.Library.Author do
       filter expr(contains(name, ^arg(:query)))
 
       pagination offset?: true, default_limit: 12
+    end
+  end
+
+  policies do
+    policy action(:create) do
+      authorize_if actor_attribute_equals(:role, :admin)
+      authorize_if actor_attribute_equals(:role, :editor)
+    end
+
+    policy action_type(:read) do
+      authorize_if always()
+    end
+
+    policy action(:update) do
+      authorize_if actor_attribute_equals(:role, :admin)
+      authorize_if actor_attribute_equals(:role, :editor)
+    end
+
+    policy action(:destroy) do
+      authorize_if actor_attribute_equals(:role, :admin)
     end
   end
 
