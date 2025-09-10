@@ -35,6 +35,9 @@ defmodule Librex.Library do
         base_route "/authors", Librex.Library.Author do
           get :read
           index :search
+          post :create
+          patch :update
+          delete :destroy
         end
       end
     end
