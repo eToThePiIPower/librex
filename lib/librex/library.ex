@@ -1,5 +1,5 @@
 defmodule Librex.Library do
-  use Ash.Domain, otp_app: :librex, extensions: [AshPhoenix]
+  use Ash.Domain, otp_app: :librex, extensions: [AshJsonApi.Domain, AshPhoenix]
 
   resources do
     resource Librex.Library.Author do
@@ -29,5 +29,14 @@ defmodule Librex.Library do
     end
 
     resource Librex.Library.Book
+
+    json_api do
+      routes do
+        base_route "/authors", Librex.Library.Author do
+          get :read
+          index :search
+        end
+      end
+    end
   end
 end
