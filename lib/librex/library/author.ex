@@ -11,6 +11,7 @@ defmodule Librex.Library.Author do
 
   json_api do
     type "author"
+    derive_filter? false
   end
 
   postgres do
