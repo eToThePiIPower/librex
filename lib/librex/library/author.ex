@@ -4,9 +4,15 @@ defmodule Librex.Library.Author do
     otp_app: :librex,
     domain: Librex.Library,
     data_layer: AshPostgres.DataLayer,
-    authorizers: [Ash.Policy.Authorizer]
+    authorizers: [Ash.Policy.Authorizer],
+    extensions: [AshJsonApi.Resource]
 
   alias Librex.Library.Book
+
+  json_api do
+    type "author"
+    derive_filter? false
+  end
 
   postgres do
     table "authors"
@@ -60,7 +66,9 @@ defmodule Librex.Library.Author do
       public? true
     end
 
-    attribute :biography, :string
+    attribute :biography, :string do
+      public? true
+    end
 
     create_timestamp :inserted_at, public?: true
     update_timestamp :updated_at, public?: true
@@ -69,6 +77,7 @@ defmodule Librex.Library.Author do
   relationships do
     has_many :books, Book do
       sort year_released: :desc
+      public? true
     end
   end
 

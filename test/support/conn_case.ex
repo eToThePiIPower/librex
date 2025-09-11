@@ -26,7 +26,7 @@ defmodule LibrexWeb.ConnCase do
 
       # Import conveniences for testing with connections
       import Plug.Conn
-      import Phoenix.ConnTest
+      import Phoenix.ConnTest, except: [get: 3, delete: 3]
       import LibrexWeb.ConnCase
       import Librex.Support.Helpers
       import Librex.Generator

@@ -4,7 +4,11 @@ defmodule Librex.Accounts.User do
     domain: Librex.Accounts,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshAuthentication]
+    extensions: [AshJsonApi.Resource, AshAuthentication]
+
+  json_api do
+    type "user"
+  end
 
   authentication do
     add_ons do
@@ -239,6 +243,10 @@ defmodule Librex.Accounts.User do
 
     bypass action(:set_role) do
       authorize_if actor_attribute_equals(:role, :admin)
+    end
+
+    bypass action([:register_with_password, :sign_in_with_password]) do
+      authorize_if always()
     end
 
     policy action(:read) do
