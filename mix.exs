@@ -41,6 +41,7 @@ defmodule Librex.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:mix_audit, "~> 2.1", only: [:dev, :test]},
       {:open_api_spex, "~> 3.0"},
       {:ash_json_api, "~> 1.0"},
       {:ash_authentication_phoenix, "~> 2.0"},
