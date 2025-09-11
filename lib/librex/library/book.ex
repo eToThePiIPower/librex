@@ -4,7 +4,12 @@ defmodule Librex.Library.Book do
     otp_app: :librex,
     domain: Librex.Library,
     data_layer: AshPostgres.DataLayer,
-    authorizers: [Ash.Policy.Authorizer]
+    authorizers: [Ash.Policy.Authorizer],
+    extensions: [AshJsonApi.Resource]
+
+  json_api do
+    type "book"
+  end
 
   postgres do
     table "books"
@@ -80,14 +85,18 @@ defmodule Librex.Library.Book do
 
     attribute :title, :string do
       allow_nil? false
+      public? true
       constraints max_length: 128
     end
 
     attribute :year_released, :integer do
       allow_nil? false
+      public? true
     end
 
-    attribute :cover_image_url, :string
+    attribute :cover_image_url, :string do
+      public? true
+    end
 
     create_timestamp :inserted_at
     update_timestamp :updated_at
@@ -102,10 +111,10 @@ defmodule Librex.Library.Book do
     belongs_to :updated_by, Librex.Accounts.User
   end
 
+  def next_year, do: Date.utc_today().year + 1
+
   identities do
     identity :unique_book_title_per_author, [:title, :author_id],
       message: "already exists for this author"
   end
-
-  def next_year, do: Date.utc_today().year + 1
 end

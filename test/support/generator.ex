@@ -26,7 +26,7 @@ defmodule Librex.Generator do
   def book(opts \\ []) do
     author_id =
       opts[:author_id] ||
-        once(:default_author_id, fn -> generate(author().id) end)
+        once(:default_author_id, fn -> generate(author()).id end)
 
     seed_generator(
       %Librex.Library.Book{

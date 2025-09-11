@@ -76,6 +76,7 @@ defmodule Librex.Library.Author do
   relationships do
     has_many :books, Book do
       sort year_released: :desc
+      public? true
     end
   end
 

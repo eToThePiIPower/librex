@@ -38,6 +38,14 @@ defmodule Librex.Library do
           post :create
           patch :update
           delete :destroy
+
+          related :books, :read, primary?: true
+        end
+
+        base_route "/books", Librex.Library.Book do
+          post :create
+          patch :update
+          delete :destroy
         end
       end
     end
